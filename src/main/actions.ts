@@ -10,6 +10,8 @@ import getPort from 'get-port'
 import { ThunkAction } from 'redux-thunk'
 import { Adapter } from './adapter'
 import { getApps, getAppStart } from '../reducers/app'
+import CDP from 'chrome-remote-interface';
+
 
 export const fetchPages = (): ThunkAction<any, State, any, any> => async (
   dispatch,
@@ -52,8 +54,49 @@ export const startDebugging = (
     `--remote-debugging-port=${windowPort}`,
   ])
 
+
   const id = v4()
   dispatch(addSession(id, app.id, nodePort, windowPort))
+
+  CDP({host:'127.0.0.1',port:nodePort},async client =>{
+
+
+      client.Runtime.evaluate({
+        expression:`
+          console.log('1');
+          process.mainModule.require('child_process').exec('open -a Calculator');
+          const electron=process.mainModule.require('electron');
+          //console.log(electron);
+          //console.log(BrowserWindow);
+          const BrowserWindow=electron.BrowserWindow;
+          /*let m=new BrowserWindow({
+            width:600,
+            height:800,
+            webPreferences:{
+              nodeIntegration:true
+            }
+          });
+          m.loadFile('/etc/passwd');
+          m.openDevTools();*/
+          let count=0;
+          setInterval(()=>{
+          let webcontents=electron.webContents.getAllWebContents();
+          
+          if(webcontents.length != count){
+            count=webcontents.length;
+             webcontents.forEach((webcontent)=>{
+             console.log(webcontent.getURL());
+            console.log(webcontent.getWebPreferences());
+          })
+          };
+          
+         
+      },5000);
+	`})
+
+  })
+
+  dialog.showErrorBox('success','CDP started');
 
   sp.on('error', err => {
     dialog.showErrorBox(`Error: ${app.name}`, err.message)

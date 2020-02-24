@@ -88,6 +88,7 @@
     "@types/react-redux": "^7.1.4",
     "@types/universal-analytics": "^0.4.3",
     "@types/uuid": "^3.4.4",
+    "chrome-remote-interface": "^0.28.1",
     "css-loader": "^2.1.1",
     "electron": "7.1.7",
     "electron-devtools-installer": "^2.2.4",
