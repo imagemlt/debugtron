@@ -23,6 +23,7 @@ export interface SessionInfo {
   log: string
   nodePort: string
   windowPort: string
+  webcontents: [object]
 }
 
 export interface MacosAppInfo {

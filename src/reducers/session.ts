@@ -5,6 +5,7 @@ const ADD_SESSION = 'ADD_SESSION'
 const UPDATE_PAGES = 'UPDATE_PAGES'
 const UPDATE_LOG = 'UPDATE_LOG'
 const REMOVE_SESSION = 'REMOVE_SESSION'
+const UPDATE_WEBCONTENTS = 'UPDATE_WEBCONTENTS'
 
 export const sessionInfo: Reducer<Dict<SessionInfo>> = (state = {}, action) => {
   const { payload } = action
@@ -42,6 +43,14 @@ export const sessionInfo: Reducer<Dict<SessionInfo>> = (state = {}, action) => {
           log: state[payload.id].log + payload.log,
         },
       }
+    case UPDATE_WEBCONTENTS:
+      return {
+        ...state,
+        [payload.id]:{
+          ...state[payload.id],
+          webcontents:payload.webcontents,
+        }
+      }
     default:
       return state
   }
@@ -70,4 +79,9 @@ export const updateLog = (id: string, log: string) => ({
 export const updatePages = (id: string, pages: Dict<PageInfo>) => ({
   type: UPDATE_PAGES,
   payload: { id, pages },
+})
+
+export const updateContents=(id:string, contents:[object])=>({
+  type:UPDATE_WEBCONTENTS,
+  payload: {id,webcontents:contents},
 })

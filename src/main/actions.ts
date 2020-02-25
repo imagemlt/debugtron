@@ -1,9 +1,9 @@
 import { v4 } from 'uuid'
 import { spawn } from 'child_process'
-import { updatePages } from '../reducers/session'
+import { updateContents, updatePages } from '../reducers/session'
 import { PageInfo, Dict, AppInfo } from '../types'
 import fetch from 'node-fetch'
-import { addSession, updateLog, removeSession } from '../reducers/session'
+import { addSession, updateLog, removeSession  } from '../reducers/session'
 import { State } from '../reducers'
 import { dialog } from 'electron'
 import getPort from 'get-port'
@@ -43,7 +43,7 @@ export const fetchPages = (): ThunkAction<any, State, any, any> => async (
   }
 }
 
-export const startDebugging = (
+export const startDebugging =  (
   app: AppInfo,
 ): ThunkAction<any, State, any, any> => async (dispatch, getState) => {
   const nodePort = await getPort()
@@ -58,45 +58,43 @@ export const startDebugging = (
   const id = v4()
   dispatch(addSession(id, app.id, nodePort, windowPort))
 
-  CDP({host:'127.0.0.1',port:nodePort},async client =>{
-
-
-      client.Runtime.evaluate({
-        expression:`
-          console.log('1');
-          process.mainModule.require('child_process').exec('open -a Calculator');
-          const electron=process.mainModule.require('electron');
-          //console.log(electron);
-          //console.log(BrowserWindow);
-          const BrowserWindow=electron.BrowserWindow;
-          /*let m=new BrowserWindow({
-            width:600,
-            height:800,
-            webPreferences:{
-              nodeIntegration:true
-            }
-          });
-          m.loadFile('/etc/passwd');
-          m.openDevTools();*/
-          let count=0;
-          setInterval(()=>{
-          let webcontents=electron.webContents.getAllWebContents();
-          
-          if(webcontents.length != count){
-            count=webcontents.length;
-             webcontents.forEach((webcontent)=>{
-             console.log(webcontent.getURL());
-            console.log(webcontent.getWebPreferences());
+  setTimeout(function(){
+    CDP({port:nodePort},async client => {
+      let count=0;
+      let interval=setInterval(async function() {
+        try{
+          let length=await client.Runtime.evaluate({
+            expression: `process.mainModule.require('electron').webContents.getAllWebContents().length`
           })
-          };
           
-         
-      },5000);
-	`})
+          if(length.result.value!=count){
+            count=length.result.value;
+            let webcontents=await client.Runtime.evaluate({
+              expression: `
+            result=[]
+            contents=process.mainModule.require('electron').webContents.getAllWebContents();
+            for(let i=0;i<contents.length;i++){
+              let cw=contents[i];
+              result.push({"url":cw.getURL(),"webPreferences":cw.getWebPreferences()})
+            };
+            JSON.stringify(result);
+            `
+            })
 
-  })
+            dispatch(updateContents(id,JSON.parse(webcontents.result.value)))
+          }
+        }catch(e){
+          console.log(e)
+          clearInterval(interval)
+        }
+      },5000)
+    })
+  },1000)
 
-  dialog.showErrorBox('success','CDP started');
+
+
+
+  //dialog.showErrorBox('success','CDP started');
 
   sp.on('error', err => {
     dialog.showErrorBox(`Error: ${app.name}`, err.message)

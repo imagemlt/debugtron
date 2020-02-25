@@ -213,11 +213,25 @@ export const App: React.FC = () => {
                         flexGrow: 1,
                         overflow: 'auto',
                         userSelect: 'text',
+                        width:'50%',
                         fontFamily:
                           'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
                       }}
                     >
                       {session.log}
+                    </Pre>
+                    <Pre
+                      style={{
+                        flexGrow: 1,
+                        overflow: 'auto',
+                        userSelect: 'text',
+                        width:'50%',
+                        fontFamily:
+                          'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+                      }}
+                    >
+                      webContents count:{session.webcontents==undefined?0:session.webcontents.length};{"\n"}
+                      {JSON.stringify(session.webcontents,null,2)}
                     </Pre>
                   </div>
                 }
