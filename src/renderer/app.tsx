@@ -208,31 +208,118 @@ export const App: React.FC = () => {
                       </HTMLTable>
                     </div>
                     <Divider />
-                    <Pre
-                      style={{
-                        flexGrow: 1,
-                        overflow: 'auto',
-                        userSelect: 'text',
-                        width:'50%',
-                        fontFamily:
-                          'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
-                      }}
+                    <Tabs
+                      defaultSelectedTabId={'Log'}
                     >
-                      {session.log}
-                    </Pre>
-                    <Pre
-                      style={{
-                        flexGrow: 1,
-                        overflow: 'auto',
-                        userSelect: 'text',
-                        width:'50%',
-                        fontFamily:
-                          'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
-                      }}
-                    >
-                      webContents count:{session.webcontents==undefined?0:session.webcontents.length};{"\n"}
-                      {JSON.stringify(session.webcontents,null,2)}
-                    </Pre>
+                   <Tab
+                     id={'webContents'}
+                     key={'webContents'}
+                     title={'webContents'}
+                     panel={
+                     <HTMLTable style={{
+                       //flexGrow: 0,
+                       //overflow: 'auto',
+                       userSelect: 'text',
+                       width: '50%',
+                       fontFamily:
+                         'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+
+                     }} condensed interactive>
+
+                       <thead>
+                       <tr>
+                         <th>URL</th>
+                         <th>nodeIntegration</th>
+                         <th>contextIsolation</th>
+                         <th>sandbox</th>
+                         <th>nativeWindowOpen</th>
+                         <th>webPreferences</th>
+                       </tr>
+                       </thead>
+                       <tbody>
+                       {session.webcontents == undefined ? <tr></tr> : session.webcontents.map((webcontent) => (
+                         <tr key={webcontent.id}>
+                           <td
+                             style={{
+                               maxWidth: 200,
+                               wordWrap: 'break-word',
+                             }}
+                           >
+                             {webcontent.url}
+                           </td>
+                           <td
+                             style={{
+                               maxWidth: 100,
+                               wordWrap: 'break-word',
+                               color: webcontent.webPreferences.nodeIntegration == true ? 'red' : 'black',
+                             }}
+                           >
+                             {webcontent.webPreferences.nodeIntegration ? "true" : "false"}
+                           </td>
+                           <td
+                             style={{
+                               maxWidth: 100,
+                               wordWrap: 'break-word',
+                               color: webcontent.webPreferences.contextIsolation == false ? 'red' : 'black',
+                             }}
+                           >
+                             {webcontent.webPreferences.contextIsolation ? "true" : "false"}
+                           </td>
+                           <td
+                             style={{
+                               maxWidth: 100,
+                               wordWrap: 'break-word',
+                               color: webcontent.webPreferences.sandbox == false ? 'red' : 'black',
+                             }}
+                           >
+                             {webcontent.webPreferences.sandbox ? "true" : "false"}
+                           </td>
+                           <td
+                             style={{
+                               maxWidth: 100,
+                               wordWrap: 'break-word',
+                               color: webcontent.webPreferences.nativeWindowOpen == false ? 'red' : 'black',
+                             }}
+                           >
+                             {webcontent.webPreferences.nativeWindowOpen ? "true" : "false"}
+                           </td>
+                           <td
+                             style={{
+                               maxWidth: 400,
+                               wordWrap: 'break-word',
+                               overflow: 'auto'
+                             }}
+                           >
+                             {JSON.stringify(webcontent.webPreferences, null, 2)}
+                           </td>
+                         </tr>
+                       ))}
+                       </tbody>
+                     </HTMLTable>
+                   }>
+                   </Tab>
+                      <Tab
+                        id={'Log'}
+                        key={'Log'}
+                        title={'Log'}
+                        style={{
+                          marginTop:0,
+                        }}
+                        panel={
+                        <Pre
+                          style={{
+                            flexGrow: 1,
+                            overflow: 'auto',
+                            userSelect: 'text',
+                            fontFamily:
+                              'SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace',
+                          }}
+                        >
+                          {session.log}
+                        </Pre>
+                      }>
+                      </Tab>
+                    </Tabs>
                   </div>
                 }
               />

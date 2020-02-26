@@ -61,13 +61,14 @@ export const startDebugging =  (
   setTimeout(function(){
     CDP({port:nodePort},async client => {
       let count=0;
+      let renew=false;
       let interval=setInterval(async function() {
         try{
           let length=await client.Runtime.evaluate({
             expression: `process.mainModule.require('electron').webContents.getAllWebContents().length`
           })
-          
-          if(length.result.value!=count){
+
+          if(renew || length.result.value!=count){
             count=length.result.value;
             let webcontents=await client.Runtime.evaluate({
               expression: `
@@ -75,13 +76,20 @@ export const startDebugging =  (
             contents=process.mainModule.require('electron').webContents.getAllWebContents();
             for(let i=0;i<contents.length;i++){
               let cw=contents[i];
-              result.push({"url":cw.getURL(),"webPreferences":cw.getWebPreferences()})
+              result.push({"id":cw.id,"url":cw.getURL(),"webPreferences":cw.getWebPreferences()})
             };
             JSON.stringify(result);
             `
             })
-
-            dispatch(updateContents(id,JSON.parse(webcontents.result.value)))
+            renew=false;
+            let webContents=JSON.parse(webcontents.result.value)
+            console.log(webContents);
+            for(let wc=0;wc<webContents.length;wc++){
+              if(webContents[wc].url==""){
+                renew=true;
+              }
+            }
+            dispatch(updateContents(id,webContents))
           }
         }catch(e){
           console.log(e)

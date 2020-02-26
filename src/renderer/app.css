@@ -6,3 +6,7 @@ body {
 .hoverable:hover {
   background-color: #eeeeee;
 }
+
+.bp3-tab-panel {
+  margin-top: 3px;
+}
