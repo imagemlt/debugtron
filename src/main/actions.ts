@@ -11,6 +11,7 @@ import { ThunkAction } from 'redux-thunk'
 import { Adapter } from './adapter'
 import { getApps, getAppStart } from '../reducers/app'
 import CDP from 'chrome-remote-interface';
+import { ipcMain } from 'electron'
 
 
 export const fetchPages = (): ThunkAction<any, State, any, any> => async (
@@ -54,7 +55,6 @@ export const startDebugging =  (
     `--remote-debugging-port=${windowPort}`,
   ])
 
-
   const id = v4()
   dispatch(addSession(id, app.id, nodePort, windowPort))
 
@@ -62,6 +62,19 @@ export const startDebugging =  (
     CDP({port:nodePort},async client => {
       let count=0;
       let renew=false;
+
+      ipcMain.on(`open_devtools_${app.id}`,(event,args)=>{
+        async function openDev() {
+          console.log(event);
+          let res = await client.Runtime.evaluate({
+            expression: `process.mainModule.require('electron').webContents.fromId(${args.id}).openDevTools()`
+          });
+          console.log(res);
+        }
+        if(!client.CLOSED)
+          openDev();
+      })
+
       let interval=setInterval(async function() {
         try{
           let length=await client.Runtime.evaluate({

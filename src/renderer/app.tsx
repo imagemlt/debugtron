@@ -228,17 +228,37 @@ export const App: React.FC = () => {
 
                        <thead>
                        <tr>
+                         <th>Id</th>
                          <th>URL</th>
                          <th>nodeIntegration</th>
                          <th>contextIsolation</th>
                          <th>sandbox</th>
                          <th>nativeWindowOpen</th>
+                         <th>webSecurity</th>
                          <th>webPreferences</th>
                        </tr>
                        </thead>
                        <tbody>
-                       {session.webcontents == undefined ? <tr></tr> : session.webcontents.map((webcontent) => (
+                       {session.webcontents == undefined  ? <tr></tr> : session.webcontents.map((webcontent) =>webcontent.url.indexOf("chrome") != 0 && (
                          <tr key={webcontent.id}>
+                           <td
+                             style={{
+                               maxWidth: 200,
+                               wordWrap: 'break-word',
+                             }}
+                           >
+                             <Button
+                               small
+                               icon="share"
+                               onClick={() => {
+                                 console.log(session.appId)
+                                 ipcRenderer.send(`open_devtools_${session.appId}`, { id: webcontent.id })
+                               }}
+                             >
+                               {webcontent.id}
+                             </Button>
+
+                           </td>
                            <td
                              style={{
                                maxWidth: 200,
@@ -285,12 +305,21 @@ export const App: React.FC = () => {
                            </td>
                            <td
                              style={{
-                               maxWidth: 400,
+                               maxWidth: 100,
                                wordWrap: 'break-word',
-                               overflow: 'auto'
+                               color: webcontent.webPreferences.webSecurity == false ? 'red' : 'black',
                              }}
                            >
-                             {JSON.stringify(webcontent.webPreferences, null, 2)}
+                             {webcontent.webPreferences.webSecurity ? "true" : "false"}
+                           </td>
+                           <td
+                             style={{
+                               maxWidth: 400,
+                               //wordWrap: 'break-word',
+                               overflow: 'scroll'
+                             }}
+                           >
+                             {JSON.stringify(webcontent.webPreferences)}
                            </td>
                          </tr>
                        ))}

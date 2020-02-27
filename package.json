@@ -56,7 +56,7 @@
           "name": "@electron-forge/publisher-github",
           "config": {
             "repository": {
-              "owner": "bytedance",
+              "owner": "imagemlt",
               "name": "debugtron"
             }
           }
