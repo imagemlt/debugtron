@@ -89,6 +89,7 @@ export const startDebugging =  (
             contents=process.mainModule.require('electron').webContents.getAllWebContents();
             for(let i=0;i<contents.length;i++){
               let cw=contents[i];
+              if(cw.getURL().indexOf('chrome')!=0 && cw.getURL().indexOf('devtools')!=0)
               result.push({"id":cw.id,"url":cw.getURL(),"webPreferences":cw.getWebPreferences()})
             };
             JSON.stringify(result);
